@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>M2-Lernplan Survival Bingo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    :root {
+      --main-bg: linear-gradient(135deg, #dfefff, #c8ddf4);
+      --card-bg: #ffffff;
+      --cell-bg: #e9f0fb;
+      --cell-border: #bdd5ec;
+      --cell-checked: #b2d0f7;
+      --text-dark: #222;
+      --text-muted: #555;
+      --text-light: #888;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--main-bg);
+      padding: 15px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bingo-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      max-width: 1000px;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #3b5998;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .instructions {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px;
+      margin: 20px 0;
+      border: 3px solid #aac8e4;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .bingo-cell {
+      aspect-ratio: 1;
+      background: var(--cell-bg);
+      border: 1px solid var(--cell-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      padding: 6px;
+      line-height: 1.2;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .bingo-cell:hover {
+      background: #d5e7fa;
+    }
+
+    .bingo-cell.checked {
+      background: var(--cell-checked);
+      text-decoration: line-through;
+    }
+
+    .joker {
+      background: linear-gradient(135deg, #4a90e2, #357ABD);
+      color: white !important;
+    }
+
+    .bingo-cell.joker.checked {
+      opacity: 0.8;
+      text-decoration: line-through;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid #eee;
+    }
+
+    .footer-text {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .emoji {
+      font-size: 1.1em;
+      margin: 0 5px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0 20px;
+    }
+
+    .print-button, .reset-button {
+      padding: 10px 20px;
+      background: #3b5998;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .print-button:hover, .reset-button:hover {
+      background: #2f477a;
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        padding: 0;
+      }
+
+      .bingo-card {
+        box-shadow: none;
+        max-width: none;
+        width: 100%;
+        padding: 15px;
+        background: white !important;
+      }
+
+      .bingo-cell {
+        background: white !important;
+        border: 1px solid #aaa !important;
+        color: black !important;
+      }
+
+      .checked {
+        background: #ccc !important;
+      }
+
+      .joker {
+        background: #ddd !important;
+        color: black !important;
+      }
+
+      .print-button, .reset-button {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .title {
+        font-size: 1.8rem;
+      }
+
+      .bingo-cell {
+        font-size: 0.6rem;
+        padding: 3px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bingo-card">
+    <div class="header">
+      <h1 class="title">🥳 M2-LERNPLAN SURVIVAL BINGO 🎯</h1>
+      <p class="subtitle">Momente, die wir alle fühlen!</p>
+      <p class="instructions">Klicke auf ein Feld, um es abzuhaken! Spielstand wird gespeichert.</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="print-button" onclick="window.print()">🖨️ Druckfreundliche Version</button>
+      <button class="reset-button" onclick="resetBingo()">🔄 Spielstand zurücksetzen</button>
+    </div>
+
+    <div class="bingo-grid" id="bingoGrid"></div>
+
+    <div class="footer">
+      <p class="footer-text">
+        <span class="emoji">💪</span>
+        Du schaffst das! Maschinen rocken diesen Lernplan – ich glaub an dich!
+        <span class="emoji">🌟</span>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById("bingoGrid");
+
+    const cells = [
+      ["geweint", "ab 14 Uhr am Schreibtisch gesessen", "„Hatten wir das Thema jemals?\"", "<50% gekreuzt", "Träume über Stex gehabt", "bezüglich Lernstand geflunkert", "Schnapszahl gekreuzt", "Amboss Website war down"],
+      ["Absatz 3x lesen müssen", "an Selfcare gedacht", "Kapitel geskippt", "JOKER", "Lerntag in der Bib", "Meditricks/Youtube genutzt", "Einkaufen war soziales Highlight", "nach 24 Uhr noch gelernt"],
+      ["Mental-Health-Spaziergang", "3 Tage Mensa", "auf Podcast geswitcht", "Urlaub gebucht", "Disco getanzt", "Eselsbrücke erfunden", "Über Exma nachgedacht", "Kittel-Fantasie"],
+      ["mit FreundIn telefoniert", "Umarmung bekommen", "Kaffee vor dem ersten Kapitel", "geweint Part 2", "Kopf-/Augenschmerzen", "in der Sonne gelernt", "vor Derma geekelt", "„Aha\"-Moment gehabt"],
+      ["Fachbereich fertig", "5h am Stück", "Eis gegessen", ">75% gekreuzt", "JOKER", "Generalprobe", "Doccheck 10x", "ab 7 Uhr gelernt"],
+      ["JOKER", "noch im Pyjama", "x Tage bis Examen", "20 Tabs offen", "beim Lernen eingeschlafen", "Instagram verloren", "Eltern fragen nach Lernstand", ">85% gekreuzt"],
+      ["Panik wegen Zeitplan", "Existenzkrise", "Stolz empfunden", "Neid auf Sommer ohne Stex", "Zimmer aufgeräumt", "Snacks organisiert", "Bad geputzt", "Shopping als Belohnung"],
+      ["Energy Drink vor 10 Uhr", "Sport gemacht", "Treffen abgesagt", "Lerngruppe", "WLAN-Ausfall", "Strategie geändert", "Netflix-Fehler bemerkt", "JOKER"]
+    ];
+
+    function loadState() {
+      const saved = JSON.parse(localStorage.getItem("bingoState") || "[]");
+      document.querySelectorAll(".bingo-cell").forEach((cell, index) => {
+        if (saved[index]) cell.classList.add("checked");
+      });
+    }
+
+    function saveState() {
+      const states = Array.from(document.querySelectorAll(".bingo-cell"))
+        .map(cell => cell.classList.contains("checked"));
+      localStorage.setItem("bingoState", JSON.stringify(states));
+    }
+
+    function resetBingo() {
+      document.querySelectorAll(".bingo-cell").forEach(cell => {
+        cell.classList.remove("checked");
+      });
+      localStorage.removeItem("bingoState");
+    }
+
+    // Erstelle Zellen
+    cells.forEach(row => {
+      row.forEach(text => {
+        const cell = document.createElement("div");
+        cell.classList.add("bingo-cell");
+        if (text === "JOKER") {
+          cell.classList.add("joker");
+          cell.innerHTML = "Joker<br>🃏";
+        } else {
+          cell.textContent = text;
+        }
+        cell.addEventListener("click", () => {
+          cell.classList.toggle("checked");
+          saveState();
+        });
+        grid.appendChild(cell);
+      });
+    });
+
+    // Beim Laden Status wiederherstellen
+    window.addEventListener("load", loadState);
+  </script>
+</body>
+</html>
