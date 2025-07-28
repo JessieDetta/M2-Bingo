@@ -1,286 +1,412 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>M2-Lernplan Survival Bingo</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-    :root {
-      --main-bg: linear-gradient(135deg, #dfefff, #c8ddf4);
-      --card-bg: #ffffff;
-      --cell-bg: #e9f0fb;
-      --cell-border: #bdd5ec;
-      --cell-checked: #b2d0f7;
-      --text-dark: #222;
-      --text-muted: #555;
-      --text-light: #888;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--main-bg);
-      padding: 15px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .bingo-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      max-width: 1000px;
-      width: 100%;
-      transition: all 0.3s ease;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #3b5998;
-      margin-bottom: 5px;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      color: var(--text-muted);
-      font-weight: 400;
-      margin-bottom: 10px;
-    }
-
-    .instructions {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      font-style: italic;
-    }
-
-    .bingo-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 2px;
-      margin: 20px 0;
-      border: 3px solid #aac8e4;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .bingo-cell {
-      aspect-ratio: 1;
-      background: var(--cell-bg);
-      border: 1px solid var(--cell-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-dark);
-      padding: 6px;
-      line-height: 1.2;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
-
-    .bingo-cell:hover {
-      background: #d5e7fa;
-    }
-
-    .bingo-cell.checked {
-      background: var(--cell-checked);
-      text-decoration: line-through;
-    }
-
-    .joker {
-      background: linear-gradient(135deg, #4a90e2, #357ABD);
-      color: white !important;
-    }
-
-    .bingo-cell.joker.checked {
-      opacity: 0.8;
-      text-decoration: line-through;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 2px solid #eee;
-    }
-
-    .footer-text {
-      font-size: 0.9rem;
-      color: #666;
-      font-weight: 600;
-    }
-
-    .emoji {
-      font-size: 1.1em;
-      margin: 0 5px;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px 0 20px;
-    }
-
-    .print-button, .reset-button {
-      padding: 10px 20px;
-      background: #3b5998;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .print-button:hover, .reset-button:hover {
-      background: #2f477a;
-    }
-
-    @media print {
-      body {
-        background: white !important;
-        padding: 0;
-      }
-
-      .bingo-card {
-        box-shadow: none;
-        max-width: none;
-        width: 100%;
-        padding: 15px;
-        background: white !important;
-      }
-
-      .bingo-cell {
-        background: white !important;
-        border: 1px solid #aaa !important;
-        color: black !important;
-      }
-
-      .checked {
-        background: #ccc !important;
-      }
-
-      .joker {
-        background: #ddd !important;
-        color: black !important;
-      }
-
-      .print-button, .reset-button {
-        display: none;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .title {
-        font-size: 1.8rem;
-      }
-
-      .bingo-cell {
-        font-size: 0.6rem;
-        padding: 3px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="bingo-card">
-    <div class="header">
-      <h1 class="title">🥳 M2-LERNPLAN SURVIVAL BINGO 🎯</h1>
-      <p class="subtitle">Momente, die wir alle fühlen!</p>
-      <p class="instructions">Klicke auf ein Feld, um es abzuhaken! Spielstand wird gespeichert.</p>
-    </div>
-
-    <div class="btn-row">
-      <button class="print-button" onclick="window.print()">🖨️ Druckfreundliche Version</button>
-      <button class="reset-button" onclick="resetBingo()">🔄 Spielstand zurücksetzen</button>
-    </div>
-
-    <div class="bingo-grid" id="bingoGrid"></div>
-
-    <div class="footer">
-      <p class="footer-text">
-        <span class="emoji">💪</span>
-        Du schaffst das! Maschinen rocken diesen Lernplan – ich glaub an dich!
-        <span class="emoji">🌟</span>
-      </p>
-    </div>
+<div class="bingo-card" role="main" aria-label="M2 Lernplan Survival Bingo">
+  <div class="header">
+    <h1 class="title">🥳 M2-LERNPLAN SURVIVAL BINGO 🎯</h1>
+    <p class="subtitle">Momente, die wir alle fühlen!</p>
+    <p class="instructions">Jedes Abhaken ist wie ein Level-Up im Lernplan-Game, lass den Stift also glühen! <br> Wie schnell schaffst du 5 in einer Reihe?</p>
   </div>
+  <div class="bingo-grid" id="bingoGrid" role="grid" aria-label="Lernplan Bingo Spielfeld"></div>
+ 
+  <div class="controls" style="text-align:center; margin-bottom:15px;">
+  <button id="resetBtn" type="button">Reset</button>
+  <button id="printBtn" type="button" style="margin-left: 10px;">Drucken</button>
+</div>  
+  <div class="footer" aria-live="polite">
+    <p>
+      <span aria-hidden="true">🌟<br> </span>
+      Hey, du schaffst das! <br> Du bist eine Maschine und Maschinen ROCKEN DIESEN LERNPLAN! <br> You‘re doing great, you‘re on fire! Weiter geht‘s! <br> Ich glaube an dich!
+      <span aria-hidden="true"><br> 💪</span>
+    </p>
+  </div>
+</div>
+<canvas id="confetti-canvas"></canvas>
 
-  <script>
-    const grid = document.getElementById("bingoGrid");
 
-    const cells = [
-      ["geweint", "ab 14 Uhr am Schreibtisch gesessen", "„Hatten wir das Thema jemals?\"", "<50% gekreuzt", "Träume über Stex gehabt", "bezüglich Lernstand geflunkert", "Schnapszahl gekreuzt", "Amboss Website war down"],
-      ["Absatz 3x lesen müssen", "an Selfcare gedacht", "Kapitel geskippt", "JOKER", "Lerntag in der Bib", "Meditricks/Youtube genutzt", "Einkaufen war soziales Highlight", "nach 24 Uhr noch gelernt"],
-      ["Mental-Health-Spaziergang", "3 Tage Mensa", "auf Podcast geswitcht", "Urlaub gebucht", "Disco getanzt", "Eselsbrücke erfunden", "Über Exma nachgedacht", "Kittel-Fantasie"],
-      ["mit FreundIn telefoniert", "Umarmung bekommen", "Kaffee vor dem ersten Kapitel", "geweint Part 2", "Kopf-/Augenschmerzen", "in der Sonne gelernt", "vor Derma geekelt", "„Aha\"-Moment gehabt"],
-      ["Fachbereich fertig", "5h am Stück", "Eis gegessen", ">75% gekreuzt", "JOKER", "Generalprobe", "Doccheck 10x", "ab 7 Uhr gelernt"],
-      ["JOKER", "noch im Pyjama", "x Tage bis Examen", "20 Tabs offen", "beim Lernen eingeschlafen", "Instagram verloren", "Eltern fragen nach Lernstand", ">85% gekreuzt"],
-      ["Panik wegen Zeitplan", "Existenzkrise", "Stolz empfunden", "Neid auf Sommer ohne Stex", "Zimmer aufgeräumt", "Snacks organisiert", "Bad geputzt", "Shopping als Belohnung"],
-      ["Energy Drink vor 10 Uhr", "Sport gemacht", "Treffen abgesagt", "Lerngruppe", "WLAN-Ausfall", "Strategie geändert", "Netflix-Fehler bemerkt", "JOKER"]
-    ];
 
-    function loadState() {
-      const saved = JSON.parse(localStorage.getItem("bingoState") || "[]");
-      document.querySelectorAll(".bingo-cell").forEach((cell, index) => {
-        if (saved[index]) cell.classList.add("checked");
-      });
-    }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-    function saveState() {
-      const states = Array.from(document.querySelectorAll(".bingo-cell"))
-        .map(cell => cell.classList.contains("checked"));
-      localStorage.setItem("bingoState", JSON.stringify(states));
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    function resetBingo() {
-      document.querySelectorAll(".bingo-cell").forEach(cell => {
-        cell.classList.remove("checked");
-      });
-      localStorage.removeItem("bingoState");
-    }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #9fd1c2 0%, #e1edb9 100%);
+  padding: 15px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    // Erstelle Zellen
-    cells.forEach(row => {
-      row.forEach(text => {
-        const cell = document.createElement("div");
-        cell.classList.add("bingo-cell");
-        if (text === "JOKER") {
-          cell.classList.add("joker");
-          cell.innerHTML = "Joker<br>🃏";
-        } else {
-          cell.textContent = text;
-        }
-        cell.addEventListener("click", () => {
-          cell.classList.toggle("checked");
-          saveState();
-        });
-        grid.appendChild(cell);
-      });
+.bingo-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 25px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  max-width: 800px;
+  width: 100%;
+  user-select: none;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.instructions {
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+  margin-top: 6px;
+}
+
+.bingo-grid {
+  display: grid;
+
+
+
+const items = [
+  "geweint",
+  "geweint Part 2",
+  "„Hatten wir das Thema jemals?“",
+  "<50% gekreuzt",
+  ">75% gekreuzt",
+  ">85% gekreuzt",
+  "Schnapszahl gekreuzt (Kommastellen egal)",
+  "Amboss Website war down",
+  "Absatz 3x lesen müssen zum verstehen",
+  "nach 24 Uhr noch am Lernplan gesessen",
+  "Kapitel geskippt",
+  "Kopf-/Augenschmerzen vom Bildschirm",
+  "auf Podcast geswitcht",
+  "Meditricks/Youtube genutzt",
+  "Einkaufen war soziales Highlight des Tages",
+  "an Selfcare gedacht",
+  "Mental-Health-Spaziergang",
+  "3 Tage hinter einander in der Mensa",
+  "Lerntag in der Bib verbracht",
+  "Urlaub gebucht",
+  "zu „Ich fühl mich Disco“ getanzt",
+  "Eselsbrücke erfunden",
+  "über Exma nachgedacht",
+  "daran erinnert wie hot du im Kittel aussehen wirst!",
+  "mit FreundIn telefoniert",
+  "Umarmung bekommen",
+  "Kaffee vor dem ersten Kapitel",
+  "in der Sonne gelernt",
+  "vor Derma-Thema geekelt",
+  "„Aha“-Moment gehabt",
+  "einen Fachbereich fertig gelernt",
+  "5h am Stück durchgezogen",
+  "Eis gegessen",
+  "Generalprobe gekreuzt",
+  "Doccheck 10x am Tag genutzt",
+  "ab 7 Uhr am Schreibtisch gesessen",
+  "ab 14 Uhr am Schreibtisch gesessen",
+  "mittags realisiert, dass du noch im Pyjama bist",
+  "Kalender in \"x Tage bis Examen\" gedacht",
+  "20 Tabs gleichzeitig offen",
+  "beim Lernen eingeschlafen",
+  "in Instagram verloren",
+  "Eltern haben wieder nach Lernstand gefragt",
+  "bezüglich Lernstand geflunkert",
+  "Panik wegen Zeitplan",
+  "Existenzkrise",
+  "Stolz empfunden",
+  "Neid auf Leute mit Sommer ohne Stex",
+  "Zimmer aufgeräumt statt gelernt",
+  "geile Snacks organisiert",
+  "Bad geputzt",
+  "Online-Shopping als Belohnung",
+  "Energy Drink vor 10 Uhr",
+  "Sport gemacht",
+  "Treffen abgesagt wegen Lernplan",
+  "Lerngruppen-Runde",
+  "WLAN-Ausfall",
+  "panisch Lernstrategie geändert",
+  "bei Netflix medizinische Fehler bemerkt",
+  "Träume über Stex gehabt"
+];
+
+function shuffleArray(arr) {
+  let array = arr.slice();
+  for (let i = array.length -1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const shuffledItems = shuffleArray(items);
+
+const grid = document.getElementById('bingoGrid');
+let checkedIndices = new Set();
+let bingoShown = false;
+
+const clickSound = new Audio('https://freesound.org/data/previews/109/109662_945474-lq.mp3');
+const applauseSound = new Audio('https://freesound.org/data/previews/198/198841_285997-lq.mp3');
+
+function createGrid() {
+  for(let i=0; i<60; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('bingo-cell');
+    cell.setAttribute('role', 'gridcell');
+    cell.setAttribute('tabindex', '0');
+    cell.textContent = shuffledItems[i];
+    cell.addEventListener('click', () => onCellClick(i));
+    cell.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onCellClick(i);
+      }
     });
+    grid.appendChild(cell);
+  }
+}
 
-    // Beim Laden Status wiederherstellen
-    window.addEventListener("load", loadState);
-  </script>
-</body>
-</html>
+function onCellClick(i) {
+  if (checkedIndices.has(i)) {
+    checkedIndices.delete(i);
+    grid.children[i].classList.remove('checked');
+  } else {
+    checkedIndices.add(i);
+    grid.children[i].classList.add('checked');
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
+  updateColors();
+  checkBingo();
+  saveState();
+}
+
+function updateColors() {
+  const cells = grid.children;
+  for(let i=0; i<cells.length; i++) {
+    const cell = cells[i];
+    const isChecked = checkedIndices.has(i);
+
+    if(!bingoShown) {
+      // vor Bingo: alle Felder blau
+      if(isChecked) {
+        cell.style.background = '#a8c1ff'; // hellblau
+        cell.style.borderColor = '#4477ff';
+        cell.style.color = '#0a1e7b';
+      } else {
+        cell.style.background = '#d0e2ff';
+        cell.style.borderColor = '#aac3ff';
+        cell.style.color = '#123a8a';
+      }
+    } else {
+      // nach Bingo: alle Felder orange
+      if(isChecked) {
+        cell.style.background = '#ff9e4a';
+        cell.style.borderColor = '#f97300';
+        cell.style.color = '#fff';
+      } else {
+        cell.style.background = '#ffc88a';
+        cell.style.borderColor = '#ffb347';
+        cell.style.color = '#7a3f00';
+      }
+    }
+  }
+}
+
+function checkBingo() {
+  const width = 6;
+  const height = 10;
+
+  // Prüfe Reihen horizontal
+  for(let r=0; r<height; r++) {
+    for(let c=0; c<=width-5; c++) {
+      let count = 0;
+      for(let offset=0; offset<5; offset++) {
+        if(checkedIndices.has(r*width + c + offset)) count++;
+      }
+      if(count === 5) {
+        if(!bingoShown) {
+          bingoShown = true;
+          announceBingo();
+          return;
+        }
+      }
+    }
+  }
+  // Prüfe Reihen vertikal
+  for(let c=0; c<width; c++) {
+    for(let r=0; r<=height-5; r++) {
+      let count = 0;
+      for(let offset=0; offset<5; offset++) {
+        if(checkedIndices.has((r+offset)*width + c)) count++;
+      }
+      if(count === 5) {
+        if(!bingoShown) {
+          bingoShown = true;
+          announceBingo();
+          return;
+        }
+      }
+    }
+  }
+}
+
+// Bingo melden + Konfetti + Applaus
+function announceBingo() {
+  alert('BINGO! 🎉 Du hast 5 Felder in einer Reihe!');
+  playApplause();
+  startConfetti();
+  setTimeout(() => {
+    stopConfetti();
+    updateColors();
+  }, 5000);
+}
+
+// Audio
+function playApplause() {
+  applauseSound.currentTime = 0;
+  applauseSound.play();
+}
+
+// Konfetti (einfache Version)
+const confettiCanvas = document.getElementById('confetti-canvas');
+const ctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiAnimationId;
+
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function createConfettiParticle() {
+  return {
+    x: randomRange(0, confettiCanvas.width),
+    y: randomRange(-20, 0),
+    r: randomRange(5, 10),
+    d: randomRange(10, 30),
+    color: `hsl(${randomRange(30, 50)}, 100%, 60%)`,
+    tilt: randomRange(-10, 10),
+    tiltAngle: 0,
+    tiltAngleIncrement: randomRange(0.05, 0.12)
+  };
+}
+
+function startConfetti() {
+  resizeCanvas();
+  confettiParticles = [];
+  for(let i=0; i<150; i++) {
+    confettiParticles.push(createConfettiParticle());
+  }
+  confettiAnimationId = requestAnimationFrame(runConfetti);
+}
+
+function runConfetti() {
+  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles.forEach(p => {
+    p.tiltAngle += p.tiltAngleIncrement;
+    p.y += Math.sin(p.d) + 1;
+    p.x += Math.sin(p.tiltAngle);
+    p.tilt = Math.sin(p.tiltAngle) * 15;
+
+    ctx.beginPath();
+    ctx.lineWidth = p.r / 2;
+    ctx.strokeStyle = p.color;
+    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+    ctx.stroke();
+
+    if(p.y > confettiCanvas.height) {
+      p.x = randomRange(0, confettiCanvas.width);
+      p.y = -10;
+    }
+  });
+  confettiAnimationId = requestAnimationFrame(runConfetti);
+}
+
+function stopConfetti() {
+  cancelAnimationFrame(confettiAnimationId);
+  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+}
+
+function resizeCanvas() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+// Speichern & Laden
+function saveState() {
+  localStorage.setItem('m2BingoChecked', JSON.stringify(Array.from(checkedIndices)));
+  localStorage.setItem('m2BingoBingoShown', bingoShown);
+}
+
+function loadState() {
+  const checkedStr = localStorage.getItem('m2BingoChecked');
+  const bingoStr = localStorage.getItem('m2BingoBingoShown');
+
+  if(checkedStr) {
+    const saved = JSON.parse(checkedStr);
+    saved.forEach(i => checkedIndices.add(i));
+  }
+  if(bingoStr === 'true') bingoShown = true;
+}
+
+function restoreChecked() {
+  const cells = grid.children;
+  checkedIndices.forEach(i => {
+    if(cells[i]) cells[i].classList.add('checked');
+  });
+}
+
+// Init
+createGrid();
+loadState();
+restoreChecked();
+updateColors();
+
+// Save beim Fenster schließen
+window.addEventListener('beforeunload', saveState);
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Willst du das Bingo wirklich zurücksetzen?')) {
+    resetBingo();
+  }
+});
+
+document.getElementById('printBtn').addEventListener('click', () => {
+  window.print();
+});
+
+function resetBingo() {
+  checkedIndices.clear();
+  bingoShown = false;
+  for(let i = 0; i < grid.children.length; i++) {
+    grid.children[i].classList.remove('checked');
+  }
+  updateColors();
+  saveState();
+}
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Willst du das Bingo wirklich zurücksetzen?')) {
+    resetBingo();
+  }
+});
